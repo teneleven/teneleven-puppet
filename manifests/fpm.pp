@@ -4,6 +4,7 @@ class teneleven::fpm (
   $dev        = true,
 
   $user       = $params::web_user,
+  $group      = $params::web_group,
 
   $fcgi_web_root = $params::web_root, /* signifies main /var/www mount */
   $fcgi_app_root = $params::app_root, /* signifies web accessible /var/www/web */
@@ -35,9 +36,12 @@ class teneleven::fpm (
   }
 
   php::fpm::pool { 'www':
-    listen => "${fcgi_web_root}/app.sock",
-    user   => $user,
-    chdir  => $fcgi_app_root,
+    listen       => "${fcgi_web_root}/app.sock",
+    chdir        => $fcgi_app_root,
+    user         => $user,
+    group        => $group,
+    listen_owner => $user,
+    listen_group => $group,
   }
 
   if ($dev) {

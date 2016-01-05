@@ -3,7 +3,7 @@ class teneleven::fpm (
   $settings   = {},
   $dev        = true,
 
-  $user  = $params::web_user,
+  $user       = $params::web_user,
 
   $fcgi_web_root = $params::web_root, /* signifies main /var/www mount */
   $fcgi_app_root = $params::app_root, /* signifies web accessible /var/www/web */
@@ -41,7 +41,11 @@ class teneleven::fpm (
   }
 
   if ($dev) {
-    php::fpm::config { 'display_errors=On': }
+    php::fpm::config { 'display_errors':
+      setting => 'display_errors',
+      value   => 'On',
+      require => Package['php5-fpm'],
+    }
   }
 
 }

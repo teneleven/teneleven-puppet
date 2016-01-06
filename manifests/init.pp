@@ -9,6 +9,10 @@ class teneleven {
     service_manage => false
   }
 
+  Service {
+    provider => 'base'
+  }
+
   group { $params::web_group:
     ensure => present,
     gid => $params::web_gid,

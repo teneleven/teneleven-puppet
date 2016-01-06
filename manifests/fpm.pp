@@ -22,8 +22,8 @@ class teneleven::fpm (
 
   /** Generic FPM configuration for usage across docker network **/
 
-  include php::fpm::params
-  include php::fpm::package
+  contain php::fpm::params
+  contain php::fpm::package
 
   class { php::fpm::service:
     enable => false,
@@ -45,11 +45,7 @@ class teneleven::fpm (
   }
 
   if ($dev) {
-    php::fpm::config { 'display_errors':
-      setting => 'display_errors',
-      value   => 'On',
-      require => Package['php5-fpm'],
-    }
+    contain teneleven::fpm::debug
   }
 
 }

@@ -9,11 +9,16 @@ define teneleven::nginx::vhost (
   $hosts               = 'test.example.com',
 
   /* default:            $web_root/$site/web */
-  $path                = "${teneleven::params::web_root}/${title}/web",
+  $path                = "${teneleven::params::web_root}/${title}/${teneleven::params::web_suffix}",
 
   $serve_php_files     = false, /* mostly useful for simple php apps */
-  $app                 = undef, /* send all undefined requests to this script (also sets index) */
+  $app                 = undef, /* proxy all 404'ed requests to this php app */
   $proxy               = undef, /* proxy all undefined requests to this uri/upstream */
+
+  /* fcgi directives, see fcgi.pp */
+  $additional_apps     = {}, /* additional fcgi definitions */
+  $fcgi_host           = "unix:///${teneleven::params::web_root}/$title/app.sock",
+  $fcgi_app_root       = $teneleven::nginx::app_root,
 
   $location_cfg_append = undef,
   $locations           = {},
@@ -21,14 +26,7 @@ define teneleven::nginx::vhost (
   $ssl                 = false,
   $ssl_cert            = undef,
   $ssl_key             = undef,
-
-  /* fcgi socket or HOST:PORT */
-  $fcgi_host           = "unix:///${teneleven::params::web_root}/$title/app.sock",
-  /* location of FCGI PHP scripts */
-  $fcgi_app_root       = "${teneleven::params::app_root}",
 ) {
-  include params
-
   if ($app) {
     $index_files = [$app]
     $location_cfg = merge({
@@ -57,43 +55,38 @@ define teneleven::nginx::vhost (
   }
 
   if ($app) {
-    ::nginx::resource::location { "${name}_app":
-      ensure          => present,
-      vhost           => $site,
-      www_root        => $path,
-      location        => "~ ^/${app}(/|\$)",
-      priority        => 401, /* ensure this rule gets hit before DENY rule below */
-      fastcgi         => $fcgi_host,
-      fastcgi_param   => {
-        'SCRIPT_FILENAME' => "${fcgi_app_root}/\$fastcgi_script_name"
-      },
+    teneleven::nginx::fcgi { "${site}_app":
+      site     => $site,
+      path     => $path,
+      host     => $fcgi_host,
+      app      => $app,
+      app_root => $fcgi_app_root,
     }
   }
 
   if ($serve_php_files) {
     /* handle *.php files */
-    ::nginx::resource::location { "${site}_php":
-      ensure          => present,
-      vhost           => $site,
-      www_root        => $path,
-      location        => '~ [^/]\.php(/|$)',
-      fastcgi         => $fcgi_host,
-      fastcgi_param   => {
-        'SCRIPT_FILENAME' => "${fcgi_app_root}/\$fastcgi_script_name"
-      },
+    teneleven::nginx::fcgi { "${site}_php":
+      site     => $site,
+      path     => $path,
+      location => '~ [^/]\.php(/|$)',
+      host     => $fcgi_host,
+      app_root => $fcgi_app_root,
 
       /* don't allow access if file doesn't exist */
-      raw_prepend     => 'if (!-f $document_root$fastcgi_script_name) { return 404; }',
+      custom_raw => 'if (!-f $document_root$fastcgi_script_name) { return 404; }',
     }
   } else {
     /* block access to *.php files */
-    ::nginx::resource::location { "${site}_php":
-      ensure          => present,
-      vhost           => $site,
-      www_root        => $path,
-      priority        => 600,
-      location        => '~ [^/]\.php(/|$)',
-      location_cfg_prepend => {
+    teneleven::nginx::fcgi { "${site}_php":
+      site     => $site,
+      path     => $path,
+      host     => $fcgi_host,
+      app_root => $fcgi_app_root,
+      priority => 600,
+      location => '~ [^/]\.php(/|$)',
+
+      custom_cfg => {
         'deny' => 'all',
         'access_log' => 'off',
         'log_not_found' => 'off',
@@ -102,4 +95,5 @@ define teneleven::nginx::vhost (
   }
 
   create_resources('nginx::resource::location', $locations, {})
+  create_resources('teneleven::nginx::fcgi',    $additional_apps, {})
 }

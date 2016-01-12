@@ -15,26 +15,28 @@ define teneleven::nginx::fcgi (
   $custom_cfg = undef, /* custom nginx location directive(s) */
   $custom_raw = undef, /* custom, raw, nginx location directive(s) */
 ) {
-  $fcgi_script = $app ? {
-    undef => '$fastcgi_script_name',
-    default => $app
+  $apps = $app ? {
+    default => any2array($app),
+    undef   => ['$fastcgi_script_name']
   }
 
-  ::nginx::resource::location { $title:
-    ensure          => present,
-    vhost           => $site,
-    www_root        => $path,
-    location        => $location ? {
-      undef   => "~ ^/${app}(/|\$)",
-      default => $location
-    },
-    fastcgi         => $host,
-    fastcgi_param   => {
-      'SCRIPT_FILENAME' => "${app_root}/${fcgi_script}"
-    },
-    priority        => $priority,
+  $apps.each |$app| {
+    ::nginx::resource::location { "${title}_${app}":
+      ensure          => present,
+      vhost           => $site,
+      www_root        => $path,
+      location        => $location ? {
+        default => $location,
+        undef   => "~ ^/${app}(/|\$)"
+      },
+      fastcgi         => $host,
+      fastcgi_param   => {
+        'SCRIPT_FILENAME' => "${app_root}/${app}"
+      },
+      priority        => $priority,
 
-    location_cfg_prepend => $custom_cfg,
-    raw_prepend          => $custom_raw,
+      location_cfg_prepend => $custom_cfg,
+      raw_prepend          => $custom_raw,
+    }
   }
 }

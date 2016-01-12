@@ -1,12 +1,13 @@
-class teneleven::container::elastic {
-  docker::run { "elastic":
-    image   => "elasticsearch",
+define teneleven::container::elastic (
+  $volume_dir = '/volumes',
+  $net        = 'web'
+) {
+  docker::run { $title:
+    image   => 'elasticsearch',
     volumes => [
       "${volume_dir}/elastic/data:/usr/share/elasticsearch/data",
       "${volume_dir}/elastic/config:/usr/share/elasticsearch/config"
     ],
-    ports   => ["9200:9200", "9300:9300"],
-    expose  => ["9200", "9300"],
-    net     => "web"
+    net     => $net
   }
 }

@@ -28,9 +28,15 @@ define teneleven::nginx::vhost (
   $ssl_key             = undef,
 ) {
   if ($app) {
-    $index_files = [$app]
+    $index_files = any2array($app)
+    $try_files = $index_files.map |$file| {
+      "/${file}\$is_args\$args"
+    }
     $location_cfg = merge({
-      'try_files' => "\$uri /${app}\$is_args\$args"
+      'try_files' => join(concat(
+        ['$uri'],
+        $try_files
+      ), ' ')
     }, $location_cfg_append)
   } else {
     if ($serve_php_files) {
@@ -72,6 +78,13 @@ define teneleven::nginx::vhost (
       location => '~ [^/]\.php(/|$)',
       host     => $fcgi_host,
       app_root => $fcgi_app_root,
+
+      custom_cfg => {
+        'fastcgi_split_path_info' => '^(.*.php)(.*)$',
+        /* fixes nginx path_info bug: https://forum.nginx.org/read.php?2,238825,238860 */
+        'fastcgi_param PATH_INFO' => '$path_info',
+        'set $path_info' => '$fastcgi_path_info',
+      },
 
       /* don't allow access if file doesn't exist */
       custom_raw => 'if (!-f $document_root$fastcgi_script_name) { return 404; }',

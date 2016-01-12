@@ -1,11 +1,11 @@
 class teneleven::nginx (
   $vhosts   = {},
-  $user     = $params::web_user,
+  $user     = $teneleven::params::web_user,
   $wildcard = undef,
 
   /* if set, manage via supervisord */
   $service_command = 'nginx -g "daemon off;"',
-) inherits params {
+) inherits teneleven::params {
   contain teneleven
 
   create_resources('teneleven::nginx::vhost', $vhosts, {})

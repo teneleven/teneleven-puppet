@@ -1,6 +1,10 @@
-class teneleven {
+class teneleven (
+  $packages = [],
+  $commands = [],
+  $programs = {}
+) {
   include apt
-  include params
+  include teneleven::params
 
   # global supervisord setup for containers
   class { 'supervisord':
@@ -13,14 +17,28 @@ class teneleven {
     provider => 'base'
   }
 
-  group { $params::web_group:
+  group { $teneleven::params::web_group:
     ensure => present,
-    gid => $params::web_gid,
+    gid => $teneleven::params::web_gid,
   }
 
-  user { $params::web_user:
+  user { $teneleven::params::web_user:
     ensure => present,
-    gid => $params::web_gid,
-    uid => $params::web_uid,
+    gid => $teneleven::params::web_gid,
+    uid => $teneleven::params::web_uid,
   }
+
+  package { $packages:
+    ensure  => present
+  }
+
+  $commands.each |$command| {
+    exec { $command:
+      command  => $command,
+      path     => ['/usr/bin', '/bin', '/usr/sbin', '/sbin'],
+      onlyif   => 'pgrep supervisord' # todo make smarter
+    }
+  }
+
+  create_resources('supervisord::program', $programs)
 }

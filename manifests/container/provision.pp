@@ -5,6 +5,8 @@ define teneleven::container::provision (
   $volumes      = [],
   $depends      = undef,
   $puppet_mount = '/puppet',
+  $expose       = [],
+  $ports        = [],
 ) {
   docker::run { $title:
     image    => 'base',
@@ -16,5 +18,7 @@ define teneleven::container::provision (
       undef   => $volumes
     },
     depends  => $depends,
+    expose   => $expose,
+    ports    => $ports,
   }
 }

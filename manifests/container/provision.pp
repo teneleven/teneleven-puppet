@@ -1,25 +1,20 @@
 define teneleven::container::provision (
-  $hostname   = $title,
-  $net        = 'web',
-  $image      = 'base',
-  $puppet_dir = undef, /* use teneleven::container::base::dir by default */
-  $volumes    = [],
-  $depends    = undef,
+  $hostname     = $title,
+  $net          = 'web',
+  $image        = 'base',
+  $volumes      = [],
+  $depends      = undef,
+  $puppet_mount = '/puppet',
 ) {
-  contain teneleven::container::base
-
-  /* uses cwd fact from provision.sh (wherever script is exec'd from) */
-  $full_puppet_dir = $puppet_dir ? {
-    default => "${cwd}/${puppet_dir}",
-    undef   => "${cwd}/${teneleven::container::base::dir}"
-  }
-
   docker::run { $title:
     image    => 'base',
     hostname => $hostname,
     net      => $net,
-    volumes  => concat($volumes, ["${full_puppet_dir}:/puppet"]),
+    volumes  => $::puppet_dir ? {
+      /* mount /puppet using puppet_dir fact */
+      default => concat($volumes, ["${::puppet_dir}:${puppet_mount}"]),
+      undef   => $volumes
+    },
     depends  => $depends,
   }
-
 }

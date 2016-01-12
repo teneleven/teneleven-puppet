@@ -1,14 +1,22 @@
 #!/bin/sh
 
-if [ -z "$puppet_dir" ]; then
-    puppet_dir='./puppet'
+if [ -z "$FACTER_puppet_dir" ]; then
+    export FACTER_puppet_dir="$(pwd)/puppet"
+fi
+
+if [ -z "$FACTER_volume_dir" ]; then
+    if [ -d "$(pwd)/volumes" ]; then
+        export FACTER_volume_dir="$(pwd)/volumes"
+    elif [ -d /var/volumes ]; then
+        export FACTER_volume_dir=/var/volumes
+    elif [ -d /volumes ]; then
+        export FACTER_volume_dir=/volumes
+    fi
 fi
 
 if ! [ -z "$1" ]; then
     export FACTER_hostname="$1"
 fi
-
-export FACTER_cwd=$(pwd)
 
 EXTRA_ARGS=""
 if [ `puppet --version | cut -c1` -eq "3" ]; then
@@ -17,7 +25,7 @@ if [ `puppet --version | cut -c1` -eq "3" ]; then
 fi
 
 puppet apply \
-  --modulepath "$puppet_dir/modules"      \
-  --hiera_config "$puppet_dir/hiera.yaml" \
+  --modulepath "$FACTER_puppet_dir/modules"      \
+  --hiera_config "$FACTER_puppet_dir/hiera.yaml" \
   $EXTRA_ARGS                             \
-  "$puppet_dir/manifests";
+  "$FACTER_puppet_dir/manifests";

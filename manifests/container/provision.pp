@@ -3,7 +3,8 @@ define teneleven::container::provision (
   $net        = 'web',
   $image      = 'base',
   $puppet_dir = undef, /* use teneleven::container::base::dir by default */
-  $volumes    = []
+  $volumes    = [],
+  $depends    = undef,
 ) {
   contain teneleven::container::base
 
@@ -18,6 +19,7 @@ define teneleven::container::provision (
     hostname => $hostname,
     net      => $net,
     volumes  => concat($volumes, ["${full_puppet_dir}:/puppet"]),
+    depends  => $depends,
   }
 
 }

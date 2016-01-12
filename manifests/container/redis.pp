@@ -1,8 +1,10 @@
 define teneleven::container::redis (
-  $net = 'web'
+  $net     = 'web',
+  $depends = undef,
 ) {
   docker::run { $title:
-    image => 'redis',
-    net   => $net
+    image   => 'redis',
+    net     => $net,
+    depends => $depends,
   }
 }

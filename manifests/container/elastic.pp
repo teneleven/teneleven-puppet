@@ -1,6 +1,7 @@
 define teneleven::container::elastic (
   $volume_dir = '/volumes',
-  $net        = 'web'
+  $net        = 'web',
+  $depends    = undef,
 ) {
   docker::run { $title:
     image   => 'elasticsearch',
@@ -8,6 +9,7 @@ define teneleven::container::elastic (
       "${volume_dir}/elastic/data:/usr/share/elasticsearch/data",
       "${volume_dir}/elastic/config:/usr/share/elasticsearch/config"
     ],
-    net     => $net
+    net     => $net,
+    depends => $depends,
   }
 }

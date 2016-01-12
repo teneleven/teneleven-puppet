@@ -3,6 +3,7 @@ define teneleven::container::provision (
   $net          = 'web',
   $image        = 'base',
   $volumes      = [],
+  $volumes_from = [],
   $depends      = undef,
   $puppet_mount = '/puppet',
   $expose       = [],
@@ -20,5 +21,6 @@ define teneleven::container::provision (
     depends  => $depends,
     expose   => $expose,
     ports    => $ports,
+    volumes_from => $volumes_from,
   }
 }

@@ -14,7 +14,7 @@ class teneleven::fpm (
   $fcgi_web_root = $teneleven::params::web_root, /* signifies main /var/www mount */
   $fcgi_app_root = $teneleven::params::app_root, /* signifies web accessible /var/www/web */
 
-  /* if set, manage via supervisord */
+  /* only used if $::is_container is true */
   $service_command = 'php5-fpm -F',
 ) inherits teneleven::params {
 
@@ -25,15 +25,18 @@ class teneleven::fpm (
   contain php::fpm::params
   contain php::fpm::package
 
-  if ($service_command) {
+  if ($::is_container) {
     class { php::fpm::service:
       enable => false,
       ensure => 'stopped',
     }
 
     supervisord::program { 'fpm':
-      command => $service_command
+      command     => $service_command,
+      autorestart => true,
     }
+  } else {
+    contain ::php::fpm::service
   }
 
   php::fpm::config { 'php-fpm':

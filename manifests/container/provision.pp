@@ -1,26 +1,22 @@
 define teneleven::container::provision (
   $hostname     = $title,
-  $net          = 'web',
-  $image        = 'base',
+  $puppet_mount = '/puppet',
   $volumes      = [],
   $volumes_from = [],
-  $depends      = undef,
-  $puppet_mount = '/puppet',
-  $expose       = [],
-  $ports        = [],
+
+  $docker_options = {},
 ) {
-  docker::run { $title:
-    image    => 'base',
-    hostname => $hostname,
-    net      => $net,
-    volumes  => $::puppet_dir ? {
+  contain teneleven::container::base
+
+  $full_docker_options = merge({
+    hostname     => $hostname,
+    volumes_from => $volumes_from,
+    volumes      => $::puppet_dir ? {
       /* mount /puppet using puppet_dir fact */
       default => concat($volumes, ["${::puppet_dir}:${puppet_mount}"]),
       undef   => $volumes
     },
-    depends  => $depends,
-    expose   => $expose,
-    ports    => $ports,
-    volumes_from => $volumes_from,
-  }
+  }, $docker_options)
+
+  create_resources('::teneleven::container::run', { $title => $full_docker_options })
 }

@@ -6,15 +6,17 @@ class teneleven (
   include apt
   include teneleven::params
 
-  # global supervisord setup for containers
-  class { 'supervisord':
-    install_pip  => true,
-    install_init => false,
-    service_manage => false
-  }
+  if ($::is_container) {
+    # global supervisord setup for containers
+    class { 'supervisord':
+      install_pip  => true,
+      install_init => false,
+      service_manage => false
+    }
 
-  Service {
-    provider => 'base'
+    Service {
+      provider => 'base'
+    }
   }
 
   group { $teneleven::params::web_group:

@@ -3,7 +3,7 @@ class teneleven::nginx (
   $user     = $teneleven::params::web_user,
   $wildcard = undef,
 
-  /* if set, manage via supervisord */
+  /* only used if $::is_container is true */
   $service_command = 'nginx -g "daemon off;"',
 ) inherits teneleven::params {
   contain teneleven
@@ -14,7 +14,8 @@ class teneleven::nginx (
     create_resources('teneleven::nginx::wildcard', { 'wildcard' => $wildcard })
   }
 
-  if ($service_command) {
+  if ($::is_container) {
+    /* todo this shouldn't be a hard stop every time */
     class { '::nginx':
       service_ensure => stopped
     }
@@ -22,7 +23,6 @@ class teneleven::nginx (
     supervisord::program { 'nginx':
       command     => $service_command,
       autorestart => true,
-      autostart   => true,
     }
   } else {
     contain ::nginx

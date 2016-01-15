@@ -6,6 +6,7 @@ define teneleven::container::mysql (
   docker::run { $title:
     image   => 'mysql',
     volumes => [
+      "${::volume_dir}/mysql/config:/etc/mysql",
       "${::volume_dir}/mysql/data:/var/lib/mysql",
       "${::volume_dir}/mysql/socket:/var/run/mysqld"
     ],

@@ -9,6 +9,12 @@ class teneleven::fpm::debug (
       value   => 'On',
       require => Package['php5-fpm'],
     }
+
+    php::cli::config { 'display_errors':
+      setting => 'display_errors',
+      value   => 'On',
+      require => Package['php5-fpm'],
+    }
   }
 
   if ($enable_xdebug) {

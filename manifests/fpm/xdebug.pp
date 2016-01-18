@@ -9,4 +9,11 @@ define teneleven::fpm::xdebug (
     section => 'xdebug',
     require => Package['php5-fpm'],
   }
+
+  php::cli::config { "${setting}-cli":
+    setting => $setting,
+    value   => $value,
+    section => 'xdebug',
+    require => Package['php5-cli'],
+  }
 }

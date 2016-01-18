@@ -10,10 +10,10 @@ class teneleven::fpm::debug (
       require => Package['php5-fpm'],
     }
 
-    php::cli::config { 'display_errors':
+    php::cli::config { 'display_errors-cli':
       setting => 'display_errors',
       value   => 'On',
-      require => Package['php5-fpm'],
+      require => Package['php5-cli'],
     }
   }
 

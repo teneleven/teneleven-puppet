@@ -24,6 +24,7 @@ class teneleven::fpm (
 
   contain php::fpm::params
   contain php::fpm::package
+  contain php::cli
 
   if ($::is_container) {
     class { php::fpm::service:

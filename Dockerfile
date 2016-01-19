@@ -31,4 +31,4 @@ COPY   provision.sh /provision.sh
 WORKDIR /
 
 # simple puppet apply command & supervisor to keep container running
-CMD /provision.sh; supervisord -n
+CMD supervisord -n

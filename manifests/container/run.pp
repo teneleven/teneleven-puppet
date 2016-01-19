@@ -9,6 +9,7 @@ define teneleven::container::run (
   $expose       = [],
   $ports        = [],
   $env          = [],
+  $provision    = false,
 ) {
   docker::run { $title:
     image    => 'base',
@@ -26,4 +27,11 @@ define teneleven::container::run (
       undef   => $volumes
     },
   }
+  -> docker::exec { "${title}-provision":
+       container => $title,
+       command   => $provision ? {
+         true  => '/provision.sh',
+         false => 'true'
+       }
+     }
 }

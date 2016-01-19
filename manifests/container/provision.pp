@@ -16,6 +16,7 @@ define teneleven::container::provision (
       default => concat($volumes, ["${::puppet_dir}:${puppet_mount}"]),
       undef   => $volumes
     },
+    provision    => true
   }, $docker_options)
 
   create_resources('::teneleven::container::run', { $title => $full_docker_options })

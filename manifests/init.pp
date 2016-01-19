@@ -1,7 +1,8 @@
 class teneleven (
   $packages = [],
   $commands = [],
-  $programs = {}
+  $programs = {},
+  $supervisorctl_command = '/usr/bin/supervisorctl',
 ) {
   include apt
   include teneleven::params
@@ -9,9 +10,10 @@ class teneleven (
   if ($::is_container) {
     # global supervisord setup for containers
     class { 'supervisord':
-      install_pip  => true,
-      install_init => false,
-      service_manage => false
+      install_pip    => true,
+      install_init   => false,
+      service_manage => false,
+      executable_ctl => $supervisorctl_command,
     }
 
     Service {

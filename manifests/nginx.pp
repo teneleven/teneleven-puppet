@@ -23,6 +23,8 @@ class teneleven::nginx (
     supervisord::program { 'nginx':
       command     => $service_command,
       autorestart => true,
+    } ~> exec { 'load-nginx':
+      command => "${::teneleven::supervisorctl_command} reload"
     }
   } else {
     contain ::nginx

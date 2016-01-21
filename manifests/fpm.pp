@@ -32,10 +32,18 @@ class teneleven::fpm (
       ensure => 'stopped',
     }
 
+    /* ensure FPM is killed when the package is installed (we want to manage with supervisor) */
+    exec { 'kill-fpm':
+      command     => 'killall php5-fpm',
+      refreshonly => true,
+      path        => ['/bin', '/usr/bin'],
+      subscribe   => Package['php5-fpm']
+    }
+
     supervisord::program { 'fpm':
       command     => $service_command,
       autorestart => true,
-    } ~> exec { 'load-fpm':
+    } -> exec { 'load-fpm':
       command => "${::teneleven::supervisorctl_command} reload"
     }
   } else {

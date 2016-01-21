@@ -15,7 +15,6 @@ class teneleven::nginx (
   }
 
   if ($::is_container) {
-    /* todo this shouldn't be a hard stop every time */
     class { '::nginx':
       service_ensure => stopped
     }
@@ -23,7 +22,7 @@ class teneleven::nginx (
     supervisord::program { 'nginx':
       command     => $service_command,
       autorestart => true,
-    } ~> exec { 'load-nginx':
+    } -> exec { 'load-nginx':
       command => "${::teneleven::supervisorctl_command} reload"
     }
   } else {

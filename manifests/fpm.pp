@@ -10,15 +10,13 @@ class teneleven::fpm (
   $user       = $teneleven::params::web_user,
   $group      = $teneleven::params::web_group,
 
-  $fcgi_listen   = "${teneleven::params::web_root}/app.sock",
+  $fcgi_listen   = '127.0.0.1:9000',
   $fcgi_web_root = $teneleven::params::web_root, /* signifies main /var/www mount */
   $fcgi_app_root = $teneleven::params::app_root, /* signifies web accessible /var/www/web */
 
   /* only used if $::is_container is true */
   $service_command = 'php5-fpm -F',
 ) inherits teneleven::params {
-
-  contain teneleven
 
   teneleven::fpm::extension { $extensions: }
 
@@ -75,4 +73,5 @@ class teneleven::fpm (
       require => Package['php5-fpm'],
     }
   }
+
 }

@@ -5,6 +5,7 @@ define teneleven::nginx::fcgi (
 
   /* fcgi socket or HOST:PORT */
   $host = "unix:///${teneleven::params::web_root}/\$sname/app.sock",
+
   /* fcgi app root in the fcgi container (e.g. /var/www or /app) */
   $app_root = $teneleven::params::app_root,
 

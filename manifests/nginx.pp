@@ -6,7 +6,6 @@ class teneleven::nginx (
   /* only used if $::is_container is true */
   $service_command = 'nginx -g "daemon off;"',
 ) inherits teneleven::params {
-  contain teneleven
 
   create_resources('teneleven::nginx::vhost', $vhosts, {})
 
@@ -25,7 +24,7 @@ class teneleven::nginx (
     } -> exec { 'load-nginx':
       command => "${::teneleven::supervisorctl_command} reload"
     }
-  } else {
-    contain ::nginx
   }
+
+  contain ::nginx
 }

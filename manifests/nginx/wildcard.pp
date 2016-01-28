@@ -6,6 +6,10 @@ define teneleven::nginx::wildcard (
   $serve_php_files     = false, /* mostly useful for simple php apps */
   $app                 = undef, /* send all undefined requests to this script (also sets index) */
   $proxy               = undef, /* proxy all undefined requests to this uri/upstream */
+  $resolver            = [],    /* proxy resolver */
+
+  /* sets up dnsmasq and sets wildcard resolver */
+  $dnsmasq             = undef,
 
   /* fcgi directives, see fcgi.pp */
   $additional_apps     = {}, /* additional fcgi definitions */
@@ -19,6 +23,19 @@ define teneleven::nginx::wildcard (
   $ssl_cert            = undef,
   $ssl_key             = undef,
 ) {
+
+  /* setup dnsmasq resolver */
+  if ($use_dnsmasq) {
+    package { 'dnsmasq':
+      ensure => present
+    }
+
+    supervisord::program { 'dnsmasq':
+      command     => 'dnsmasq -u root -k',
+      autorestart => true,
+    }
+  }
+
   teneleven::nginx::vhost { $title:
     hosts               => "~^(www\\.)?(?<sname>.+?)${host_suffix}\$",
     path                => "${teneleven::params::web_root}/\$sname/${path_suffix}",
@@ -26,6 +43,7 @@ define teneleven::nginx::wildcard (
     serve_php_files     => $serve_php_files,
     app                 => $app,
     proxy               => $proxy,
+    resolver            => any2array($resolver),
 
     location_cfg_append => $location_cfg_append,
     locations           => $locations,
@@ -42,4 +60,5 @@ define teneleven::nginx::wildcard (
 
   create_resources('nginx::resource::location', $locations, {})
   create_resources('teneleven::nginx::fcgi',    $additional_apps, {})
+
 }

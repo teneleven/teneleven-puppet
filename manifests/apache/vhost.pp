@@ -11,10 +11,9 @@ define teneleven::nginx::vhost (
   /* default:            $web_root/$site/web */
   $path                = "${teneleven::params::web_root}/${title}/${teneleven::params::web_suffix}",
 
-  $serve_php_files     = false, /* mostly useful for simple php apps */
+  $serve_php_files     = true,  /* mostly useful for simple php apps */
   $app                 = undef, /* proxy all 404'ed requests to this php app */
   $proxy               = undef, /* proxy all undefined requests to this uri/upstream */
-  $resolver            = [],    /* proxy resolver */
 
   /* fcgi directives, see fcgi.pp */
   $fcgi_host           = '127.0.0.1:9000',
@@ -50,33 +49,23 @@ define teneleven::nginx::vhost (
     $location_cfg = $location_cfg_append
   }
 
-  if ($fcgi_socket) {
-    $real_fcgi_host = "unix:///${fcgi_socket}"
-  } else {
-    $real_fcgi_host = $fcgi_host
-  }
-
   ::nginx::resource::vhost { $site:
     ensure              => present,
     index_files         => $index_files,
     server_name         => any2array($hosts),
-    www_root            => $proxy ? {
-      undef   => $path,
-      default => undef
-    },
+    www_root            => $path,
     location_cfg_append => $location_cfg,
     ssl                 => $ssl,
     ssl_cert            => $ssl_cert,
     ssl_key             => $ssl_key,
     proxy               => $proxy,
-    resolver            => $resolver,
   }
 
   if ($app) {
     teneleven::nginx::fcgi { "${site}_app":
       site     => $site,
       path     => $path,
-      host     => $real_fcgi_host,
+      host     => $fcgi_host,
       app      => $app,
       app_root => $fcgi_app_root,
     }
@@ -88,7 +77,7 @@ define teneleven::nginx::vhost (
       site     => $site,
       path     => $path,
       location => '~ [^/]\.php(/|$)',
-      host     => $real_fcgi_host,
+      host     => $fcgi_host,
       app_root => $fcgi_app_root,
 
       custom_cfg => {
@@ -102,21 +91,19 @@ define teneleven::nginx::vhost (
       custom_raw => 'if (!-f $document_root$fastcgi_script_name) { return 404; }',
     }
   } else {
-    if (!$proxy) {
-      /* block access to *.php files */
-      teneleven::nginx::fcgi { "${site}_php":
-        site     => $site,
-        path     => $path,
-        host     => $real_fcgi_host,
-        app_root => $fcgi_app_root,
-        priority => 600,
-        location => '~ [^/]\.php(/|$)',
+    /* block access to *.php files */
+    teneleven::nginx::fcgi { "${site}_php":
+      site     => $site,
+      path     => $path,
+      host     => $fcgi_host,
+      app_root => $fcgi_app_root,
+      priority => 600,
+      location => '~ [^/]\.php(/|$)',
 
-        custom_cfg => {
-          'deny' => 'all',
-          'access_log' => 'off',
-          'log_not_found' => 'off',
-        }
+      custom_cfg => {
+        'deny' => 'all',
+        'access_log' => 'off',
+        'log_not_found' => 'off',
       }
     }
   }

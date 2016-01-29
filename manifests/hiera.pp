@@ -16,7 +16,7 @@ class teneleven::hiera () {
 
   if (!empty($nginx)) {
     create_resources('class', { teneleven::nginx => $nginx })
-    contain '::teneleven::nginx'
+    /* contain '::teneleven::nginx' */
   }
 
 }

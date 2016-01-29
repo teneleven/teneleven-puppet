@@ -4,38 +4,25 @@
  * If puppet_dir fact is set, also mounts the puppet dir using the puppet_dir fact
  */
 define teneleven::container::run (
-  $hostname     = $title,
-  $image        = 'base',
-  $net          = 'web',
-  $puppet_mount = '/puppet', /* destination mount on the container */
-  $volumes      = [],
-  $volumes_from = [],
-  $default_env  = ['FACTER_is_container=1'],
+  $options      = {},        /* docker options */
+  $puppet_mount = $teneleven::params::puppet_mount,
 
-  /* extra docker options passed to docker::run - set env variables, etc. here */
-  $docker_options = {},
+  $default_hostname = $title,
+  $default_image    = 'base',
+  $default_net      = 'web',
+  $default_env      = ['FACTER_is_container=1'],
 ) {
-  contain ::teneleven::container::base
+  include ::teneleven::params
+  include ::teneleven::container::base
 
-  /* mount /puppet using puppet_dir fact, if the fact is set */
-  $real_volumes = $::puppet_dir ? {
-    default    => concat($volumes, ["${::puppet_dir}:${puppet_mount}"]),
-    undef      => $volumes
-  }
-
-  $real_env = $docker_options['env'] ? {
-    default => concat($default_env, $docker_options['env']),
-    undef   => $default_env,
-  }
-
-  $full_docker_options = merge($docker_options, {
-    hostname     => $hostname,
-    image        => $image,
-    volumes_from => $volumes_from,
-    volumes      => $real_volumes,
-    net          => $net,
-    env          => $real_env,
+  $full_options = merge({
+    hostname => $default_hostname,
+    image    => $default_image,
+    net      => $default_net,
+    env      => $default_env,
+  }, $options, {
+    volumes  => concat(["${::puppet_dir}:${puppet_mount}"], $options['volumes'])
   })
 
-  create_resources('::docker::run', { $title => $full_docker_options })
+  create_resources('::docker::run', { $title => $full_options })
 }

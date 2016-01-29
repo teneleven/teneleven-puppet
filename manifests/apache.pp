@@ -9,7 +9,11 @@ class teneleven::apache (
   $service_command = 'apache2',
 ) inherits teneleven::params {
 
-  create_resources('::apache::vhost', $vhosts, {})
+  $vhosts.each |$name, $options| {
+    create_resources('teneleven::apache::vhost', { $name => {
+      options => $options
+    }})
+  }
 
   if $modules.is_a(Array) {
     $modules.each |$mod| {
@@ -36,7 +40,6 @@ class teneleven::apache (
 
   if ($::is_container) {
     class { '::apache':
-      default_vhost  => false,
       service_ensure => stopped,
       manage_user    => false,
       manage_group   => false,
@@ -48,11 +51,8 @@ class teneleven::apache (
     } -> exec { 'load-apache':
       command => "${::teneleven::supervisorctl_command} reload"
     }
-  } else {
-    class { '::apache':
-      default_vhost => false,
-    }
   }
 
   contain '::apache'
+
 }

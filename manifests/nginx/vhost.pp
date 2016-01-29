@@ -8,6 +8,9 @@ define teneleven::nginx::vhost (
   /* string or array of strings */
   $hosts               = 'test.example.com',
 
+  /* nginx listen options */
+  $listen_options      = undef,
+
   /* default:            $web_root/$site/web */
   $path                = "${teneleven::params::web_root}/${title}/${teneleven::params::web_suffix}",
 
@@ -59,6 +62,7 @@ define teneleven::nginx::vhost (
   ::nginx::resource::vhost { $site:
     ensure              => present,
     index_files         => $index_files,
+    listen_options      => $listen_options,
     server_name         => any2array($hosts),
     www_root            => $proxy ? {
       undef   => $path,
@@ -69,6 +73,10 @@ define teneleven::nginx::vhost (
     ssl_cert            => $ssl_cert,
     ssl_key             => $ssl_key,
     proxy               => $proxy,
+    proxy_set_header    => $proxy ? {
+      undef   => [],
+      default => ['Host $host', 'X-Forwarded-For $remote_addr']
+    },
     resolver            => $resolver,
   }
 

@@ -1,27 +1,20 @@
 define teneleven::container::provision (
-  $hostname     = $title,
-  $image        = 'base',
-  $net          = 'web',
-  $puppet_mount = '/puppet',
-  $volumes      = [],
-  $volumes_from = [],
-
-  $docker_options = {},
+  $run_options  = {},
+  $puppet_mount = $teneleven::params::puppet_mount,
 ) {
-  contain ::teneleven::container::base
+  include ::teneleven::params
+  include ::teneleven::container::base
 
-  ::teneleven::container::run { $title:
-    hostname       => $hostname,
-    image          => $image,
-    net            => $net,
-    puppet_mount   => $puppet_mount,
-    volumes        => $volumes,
-    volumes_from   => $volumes_from,
-    docker_options => $docker_options,
+  create_resources('::teneleven::container::run', { $title => {
+    options      => $run_options,
+    puppet_mount => $puppet_mount,
+  }})
+
+  ::docker::exec { "${title}-provision":
+    container => $title,
+    command   => '/provision.sh',
+    detach    => true,
   }
-    -> ::docker::exec { "${title}-provision":
-      container => $hostname,
-      command   => '/provision.sh',
-      detach    => true,
-    }
+
+  Teneleven::Container::Run[$title] -> Docker::Exec["${title}-provision"]
 }

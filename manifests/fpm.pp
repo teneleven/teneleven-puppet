@@ -10,9 +10,9 @@ class teneleven::fpm (
   $user       = $teneleven::params::web_user,
   $group      = $teneleven::params::web_group,
 
-  $fcgi_listen   = '127.0.0.1:9000',
-  $fcgi_web_root = $teneleven::params::web_root, /* signifies main /var/www mount */
-  $fcgi_app_root = $teneleven::params::app_root, /* signifies web accessible /var/www/web */
+  $listen     = '127.0.0.1:9000',
+
+  $path       = $teneleven::params::app_root, /* signifies web accessible /var/www/web */
 
   /* only used if $::is_container is true */
   $service_command = 'php5-fpm -F',
@@ -54,8 +54,8 @@ class teneleven::fpm (
   }
 
   php::fpm::pool { 'www':
-    listen       => $fcgi_listen,
-    chdir        => $fcgi_app_root,
+    listen       => $listen,
+    chdir        => $path,
     user         => $user,
     group        => $group,
     listen_owner => $user,

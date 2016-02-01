@@ -48,8 +48,6 @@ class teneleven::apache (
     supervisord::program { 'apache':
       command     => $service_command,
       autorestart => true,
-    } -> exec { 'load-apache':
-      command => "${::teneleven::supervisorctl_command} reload"
     }
   }
 

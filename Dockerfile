@@ -3,11 +3,11 @@ FROM ubuntu:14.04
 #Optional, update mirrors speedups updates, but some mirrors sometimes fail
 #RUN sed -i -e 's,http://[^ ]*,mirror://mirrors.ubuntu.com/mirrors.txt,' /etc/apt/sources.list
 
-#update apt sources
-RUN apt-get update --fix-missing
+#enable multiverse repo
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt $(lsb_release -cs) multiverse" >> /etc/apt/sources.list
 
 #install required packages
-RUN apt-get install -y \
+RUN apt-get update --fix-missing && apt-get install -y \
         apt-utils \
         curl \
         wget \

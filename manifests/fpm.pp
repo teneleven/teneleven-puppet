@@ -41,8 +41,6 @@ class teneleven::fpm (
     supervisord::program { 'fpm':
       command     => $service_command,
       autorestart => true,
-    } -> exec { 'load-fpm':
-      command => "${::teneleven::supervisorctl_command} reload"
     }
   } else {
     contain ::php::fpm::service

@@ -3,24 +3,29 @@ class teneleven (
   $commands = [],
   $programs = {},
   $supervisorctl_command = '/usr/bin/supervisorctl',
-
-  $apt_mirror = 'http://archive.ubuntu.com/ubuntu',
 ) {
 
-  hiera_include('classes', {})
-
-  include teneleven::params
+  $apache        = hiera_hash('apache', {})
+  $php           = hiera_hash('php', {})
+  $nginx         = hiera_hash('nginx', {})
+  $full_programs = hiera_hash('programs', $programs)
+  $full_packages = hiera_array('packages', $packages)
+  $full_commands = hiera_array('commands', $commands)
 
   if ($::is_container) {
+    /* setup some helpful defaults for docker */
+
+    include teneleven::params
+
     Service {
       provider => 'base'
     }
 
+    /* the uid & gid are important assume its all 1000 pending better method */
     group { $teneleven::params::web_group:
       ensure => present,
       gid => $teneleven::params::web_gid,
     }
-
     user { $teneleven::params::web_user:
       ensure => present,
       gid => $teneleven::params::web_gid,
@@ -35,24 +40,41 @@ class teneleven (
       executable_ctl => $supervisorctl_command,
     }
 
-    class { teneleven::apt:
-      source => $apt_mirror,
-      update => true,
-    } -> class { teneleven::hiera: }
-  } else {
-    class { teneleven::apt: } -> class { teneleven::hiera: }
+    /* refresh supervisord for each program */
+    Supervisord::Program <| |> -> exec { 'reload-supervisord':
+      command => "${::teneleven::supervisorctl_command} reload",
+    }
+
   }
 
-  Class['teneleven::apt'] -> package { $packages: ensure => present }
+  /* do stuff from hiera config */
 
-  $commands.each |$command| {
-    exec { $command:
-      command  => $command,
-      path     => ['/usr/bin', '/bin', '/usr/sbin', '/sbin'],
-      onlyif   => 'pgrep supervisord' # todo make smarter
+  include teneleven::apt
+
+  if (!empty($php)) {
+    create_resources('class', { teneleven::fpm => $php })
+  }
+
+  if (!empty($apache)) {
+    create_resources('class', { teneleven::apache => $apache })
+  }
+
+  if (!empty($nginx)) {
+    create_resources('class', { teneleven::nginx => $nginx })
+  }
+
+  if (!empty($full_programs)) {
+    create_resources('supervisord::program', $full_programs)
+  }
+
+  if (!empty($full_packages)) {
+    Class['teneleven::apt'] -> package { $full_packages: ensure => present }
+  }
+
+  if (!empty($full_commands)) {
+    Exec['reload-supervisord'] -> exec { $full_commands:
+      path   => ['/usr/bin', '/bin', '/usr/sbin', '/sbin']
     }
   }
-
-  create_resources('supervisord::program', $programs)
 
 }

@@ -6,7 +6,7 @@ class teneleven::apache (
   $serve_php_files = true,
 
   /* only used if $::is_container is true */
-  $service_command = 'apache2',
+  $service_command = 'apache2ctl -DFOREGROUND',
 ) inherits teneleven::params {
 
   $vhosts.each |$name, $options| {
@@ -48,6 +48,8 @@ class teneleven::apache (
     supervisord::program { 'apache':
       command     => $service_command,
       autorestart => true,
+      killasgroup => true,
+      stopasgroup => true,
     }
   }
 

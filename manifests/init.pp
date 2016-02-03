@@ -8,6 +8,7 @@ class teneleven (
   $apache        = hiera_hash('apache', {})
   $php           = hiera_hash('php', {})
   $nginx         = hiera_hash('nginx', {})
+  $docker        = hiera_hash('docker', {})
   $full_programs = hiera_hash('programs', $programs)
   $full_packages = hiera_array('packages', $packages)
   $full_commands = hiera_array('commands', $commands)
@@ -61,6 +62,10 @@ class teneleven (
 
   if (!empty($nginx)) {
     create_resources('class', { teneleven::nginx => $nginx })
+  }
+
+  if (!empty($docker)) {
+    create_resources('class', { teneleven::docker => $docker })
   }
 
   if (!empty($full_programs)) {

@@ -21,8 +21,15 @@ define teneleven::container::run (
     net      => $default_net,
     env      => $default_env,
   }, $options, {
-    volumes  => concat(["${::puppet_dir}:${puppet_mount}"], $options['volumes'])
+    volumes  => $options['volumes'] ? {
+      default => concat(["${::puppet_dir}:${puppet_mount}"], $options['volumes']),
+      undef   => ["${::puppet_dir}:${puppet_mount}"]
+    }
   })
 
   create_resources('::docker::run', { $title => $full_options })
+
+  if ($options['depends']) {
+    Docker::Run[$options['depends']] -> Docker::Run[$title]
+  }
 }

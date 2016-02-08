@@ -5,7 +5,7 @@
  */
 define teneleven::container::run (
   $options      = {},        /* docker options */
-  $puppet_mount = $teneleven::params::puppet_mount,
+  $puppet_mount = undef,
 
   $default_hostname = $title,
   $default_image    = 'base',
@@ -15,19 +15,26 @@ define teneleven::container::run (
   include ::teneleven::params
   include ::teneleven::container::base
 
-  $full_options = merge({
+  $real_puppet_mount = $puppet_mount ? {
+    default => $puppet_mount,
+    undef   => $::teneleven::params::puppet_mount
+  }
+
+  $default_options = {
     hostname => $default_hostname,
     image    => $default_image,
     net      => $default_net,
     env      => $default_env,
-  }, $options, {
-    volumes  => $options['volumes'] ? {
-      default => concat(["${::puppet_dir}:${puppet_mount}"], $options['volumes']),
-      undef   => ["${::puppet_dir}:${puppet_mount}"]
-    }
-  })
+    remove_container_on_start => false,
+    remove_container_on_stop  => false,
+  }
 
-  create_resources('::docker::run', { $title => $full_options })
+  $volumes = $options['volumes'] ? {
+    default => concat(["${::puppet_dir}:${real_puppet_mount}"], $options['volumes']),
+    undef   => ["${::puppet_dir}:${real_puppet_mount}"]
+  }
+
+  create_resources('::docker::run', { $title => merge($default_options, $options, { volumes => $volumes }) })
 
   if ($options['depends']) {
     Docker::Run[$options['depends']] -> Docker::Run[$title]

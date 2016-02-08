@@ -1,6 +1,6 @@
 define teneleven::container::provision (
   $run_options  = {},
-  $puppet_mount = $teneleven::params::puppet_mount,
+  $puppet_mount = undef,
 ) {
   include ::teneleven::params
   include ::teneleven::container::base

@@ -13,7 +13,7 @@ define teneleven::nginx::fcgi (
   $location = undef,
   $priority = 401,
 
-  $custom_cfg = undef, /* custom nginx location directive(s) */
+  $custom_cfg = {},    /* custom nginx location directive(s) */
   $custom_raw = undef, /* custom, raw, nginx location directive(s) */
 ) {
   $apps = $app ? {
@@ -36,7 +36,10 @@ define teneleven::nginx::fcgi (
       },
       priority        => $priority,
 
-      location_cfg_prepend => $custom_cfg,
+      location_cfg_prepend => merge({
+        fastcgi_buffers => '16 16k',
+        fastcgi_buffer_size => '32k'
+      }, $custom_cfg),
       raw_prepend          => $custom_raw,
     }
   }

@@ -4,6 +4,6 @@ class teneleven::container::base (
 ) {
   docker::image { 'base':
     docker_dir => $docker_dir,
-    ensure     => latest
+    ensure     => latest,
   }
 }

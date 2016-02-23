@@ -41,6 +41,6 @@ class teneleven::fpm::debug (
   php::cli::config { 'disable_opcache-cli': 
     setting => 'opcache.enable',
     value   => '0',
-    require => Package['php5-fpm'],
+    require => Package['php5-cli'],
   }
 }

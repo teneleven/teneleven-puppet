@@ -42,9 +42,9 @@ class teneleven (
     }
 
     /* refresh supervisord for each program */
-    Supervisord::Program <| |> -> exec { 'reload-supervisord':
-      command => "${::teneleven::supervisorctl_command} reload",
-    }
+    /* Supervisord::Program <| |> -> exec { 'reload-supervisord': */
+    /*   command => "${::teneleven::supervisorctl_command} reload", */
+    /* } */
 
   }
 

@@ -21,12 +21,12 @@ define teneleven::container::run (
   }
 
   $default_options = {
-    hostname => $default_hostname,
-    image    => $default_image,
-    net      => $default_net,
-    env      => $default_env,
-    remove_container_on_start => false,
-    remove_container_on_stop  => false,
+    hostname                  => $default_hostname,
+    image                     => $default_image,
+    net                       => $default_net,
+    env                       => $default_env,
+    remove_container_on_start => true,
+    remove_container_on_stop  => true,
   }
 
   $volumes = $options['volumes'] ? {

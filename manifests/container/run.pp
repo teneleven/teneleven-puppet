@@ -22,7 +22,6 @@ define teneleven::container::run (
   $default_options = {
     hostname                  => $default_hostname,
     image                     => $default_image,
-    env                       => $default_env,
     remove_container_on_start => true,
     remove_container_on_stop  => true,
   }
@@ -32,7 +31,12 @@ define teneleven::container::run (
     undef   => ["${::puppet_dir}:${real_puppet_mount}"]
   }
 
-  create_resources('::docker::run', { $title => merge($default_options, $options, { volumes => $volumes }) })
+  $env = $options['env'] ? {
+    default => concat($default_env, $options['env']),
+    undef   => $default_env
+  }
+
+  create_resources('::docker::run', { $title => merge($default_options, $options, { volumes => $volumes }, { env => $env }) })
 
   if ($options['depends']) {
     Docker::Run[$options['depends']] -> Docker::Run[$title]

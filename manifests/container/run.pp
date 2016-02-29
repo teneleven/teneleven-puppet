@@ -9,7 +9,6 @@ define teneleven::container::run (
 
   $default_hostname = $title,
   $default_image    = 'base',
-  $default_net      = 'web',
   $default_env      = ['FACTER_is_container=1'],
 ) {
   include ::teneleven::params
@@ -23,7 +22,6 @@ define teneleven::container::run (
   $default_options = {
     hostname                  => $default_hostname,
     image                     => $default_image,
-    net                       => $default_net,
     env                       => $default_env,
     remove_container_on_start => true,
     remove_container_on_stop  => true,

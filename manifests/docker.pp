@@ -3,6 +3,7 @@ class teneleven::docker (
   $images     = [],
   $run        = [],
   $provision  = [],
+  $compose    = [],
   $containers = {}
 ) {
   if ($install) {
@@ -52,6 +53,15 @@ class teneleven::docker (
       }
 
       create_resources('teneleven::container::provision', { $name => { run_options => $options } })
+    }
+  }
+
+  if (!empty($compose)) {
+    $compose.each |$name| {
+      docker_compose { "${::volume_dir}/www/${name}/.devops/docker-compose.yml":
+        ensure  => present,
+        options => "-p ${name}"
+      }
     }
   }
 }

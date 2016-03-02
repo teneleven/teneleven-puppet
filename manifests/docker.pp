@@ -57,11 +57,19 @@ class teneleven::docker (
   }
 
   if (!empty($compose)) {
-    $compose.each |$name| {
-      docker_compose { "${::volume_dir}/www/${name}/.devops/docker-compose.yml":
-        ensure  => present,
-        options => "-p ${name}"
+    $compose.each |$name, $compose_file| {
+      /* simple exec for docker-compose */
+      exec { "compose-${name}":
+        command     => "docker-compose -f ${compose_file} up &",
+        provider    => 'shell',
+        environment => ["COMPOSE_PROJECT_NAME=${name}"]
       }
+
+      /* FIXME not working since not setting env variable */
+      /* docker_compose { $compose_file: */
+      /*   ensure  => present, */
+      /*   options => "-p ${name}" */
+      /* } */
     }
   }
 }

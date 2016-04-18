@@ -3,7 +3,11 @@ class teneleven::apache (
   $modules  = {},
   $user     = $teneleven::params::web_user,
 
+  $port            = 80,
+  $ssl_port        = 443,
+  $ssl             = false,
   $serve_php_files = true,
+  $default_vhost   = true,
 
   /* only used if $::is_container is true */
   $service_command = 'apache2ctl -DFOREGROUND',
@@ -36,13 +40,18 @@ class teneleven::apache (
     }
   }
 
-  apache::listen { '80': }
+  apache::listen { "${port}": }
+
+  if ($ssl) {
+    apache::listen { "${ssl_port}": }
+  }
 
   if ($::is_container) {
     class { '::apache':
       service_ensure => stopped,
       manage_user    => false,
       manage_group   => false,
+      default_vhost  => $default_vhost
     }
 
     supervisord::program { 'apache':
@@ -50,6 +59,10 @@ class teneleven::apache (
       autorestart => true,
       killasgroup => true,
       stopasgroup => true,
+    }
+  } else {
+    class { '::apache':
+      default_vhost  => $default_vhost
     }
   }
 

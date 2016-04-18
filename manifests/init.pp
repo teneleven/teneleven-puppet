@@ -64,6 +64,11 @@ class teneleven (
     create_resources('class', { teneleven::nginx => $nginx })
   }
 
+  if (!empty(hiera_hash('mysql', {}))) {
+    create_resources('class', { teneleven::mysql => hiera_hash('mysql', {}) })
+  }
+
+
   if (!empty($docker)) {
     create_resources('class', { teneleven::docker => $docker })
   }

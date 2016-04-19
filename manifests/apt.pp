@@ -1,6 +1,7 @@
 class teneleven::apt (
-  $source = undef,
-  $update = false
+  $source   = undef,
+  $update   = false,
+  $packages = []
 ) {
   if ($source) {
     # configure apt sources
@@ -31,6 +32,10 @@ class teneleven::apt (
     }
 
     contain '::apt::update'
+  }
+
+  if (!empty($packages)) {
+    package { $packages: ensure => present }
   }
 
   contain '::apt'

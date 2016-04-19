@@ -1,4 +1,4 @@
-class teneleven::fpm (
+class teneleven::php (
   $extensions = {},
   $settings   = {},
 
@@ -18,7 +18,7 @@ class teneleven::fpm (
   $service_command = 'php5-fpm -F',
 ) inherits teneleven::params {
 
-  teneleven::fpm::extension { $extensions: }
+  teneleven::php::extension { $extensions: }
 
   contain php::fpm::params
   contain php::fpm::package
@@ -53,7 +53,7 @@ class teneleven::fpm (
   }
 
   if ($dev) {
-    contain teneleven::fpm::debug
+    contain teneleven::php::debug
   }
 
   $config.each |$conf, $val| {

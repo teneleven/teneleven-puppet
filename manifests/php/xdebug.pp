@@ -1,5 +1,5 @@
 /* xdebug specific php setting(s) */
-define teneleven::fpm::xdebug (
+define teneleven::php::xdebug (
   $setting = $title,
   $value   = undef,
 ) {

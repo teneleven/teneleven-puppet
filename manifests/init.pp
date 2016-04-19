@@ -5,14 +5,6 @@ class teneleven (
   $supervisorctl_command = '/usr/bin/supervisorctl',
 ) {
 
-  $apache        = hiera_hash('apache', {})
-  $php           = hiera_hash('php', {})
-  $nginx         = hiera_hash('nginx', {})
-  $docker        = hiera_hash('docker', {})
-  $full_programs = hiera_hash('programs', $programs)
-  $full_packages = hiera_array('packages', $packages)
-  $full_commands = hiera_array('commands', $commands)
-
   if ($::is_container) {
     /* setup some helpful defaults for docker */
 
@@ -48,43 +40,21 @@ class teneleven (
 
   }
 
-  /* do stuff from hiera config */
-
-  include teneleven::apt
-
-  if (!empty($php)) {
-    create_resources('class', { teneleven::fpm => $php })
+  /* parse teneleven hiera config */
+  hiera_hash('teneleven', {}).each |$name, $option| {
+    create_resources('class', { "::teneleven::${name}" => $option })
   }
 
-  if (!empty($apache)) {
-    create_resources('class', { teneleven::apache => $apache })
-  }
+  /* TODO ensure the following is preserved: */
 
-  if (!empty($nginx)) {
-    create_resources('class', { teneleven::nginx => $nginx })
-  }
+  /* if (!empty($full_programs)) { */
+  /*   create_resources('supervisord::program', $full_programs) */
+  /* } */
 
-  if (!empty(hiera_hash('mysql', {}))) {
-    create_resources('class', { teneleven::mysql => hiera_hash('mysql', {}) })
-  }
-
-
-  if (!empty($docker)) {
-    create_resources('class', { teneleven::docker => $docker })
-  }
-
-  if (!empty($full_programs)) {
-    create_resources('supervisord::program', $full_programs)
-  }
-
-  if (!empty($full_packages)) {
-    Class['teneleven::apt'] -> package { $full_packages: ensure => present }
-  }
-
-  if (!empty($full_commands)) {
-    Exec['reload-supervisord'] -> exec { $full_commands:
-      path   => ['/usr/bin', '/bin', '/usr/sbin', '/sbin']
-    }
-  }
+  /* if (!empty($full_commands)) { */
+  /*   Exec['reload-supervisord'] -> exec { $full_commands: */
+  /*     path   => ['/usr/bin', '/bin', '/usr/sbin', '/sbin'] */
+  /*   } */
+  /* } */
 
 }

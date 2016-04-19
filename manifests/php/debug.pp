@@ -1,5 +1,5 @@
 /* enables dev helpers for PHP - for now, just error reporting & xdebug */
-class teneleven::fpm::debug (
+class teneleven::php::debug (
   $display_errors = true,
   $enable_xdebug  = true,
 ) {
@@ -20,12 +20,12 @@ class teneleven::fpm::debug (
   if ($enable_xdebug) {
     contain php::extension::xdebug
 
-    teneleven::fpm::xdebug {
+    teneleven::php::xdebug {
       ['xdebug.remote_enable', 'xdebug.remote_connect_back']:
         value => '1'
     }
 
-    teneleven::fpm::xdebug {
+    teneleven::php::xdebug {
       'xdebug.max_nesting_level':
         value => '10000'
     }

@@ -9,14 +9,29 @@ class teneleven::apache (
   $serve_php_files = true,
   $default_vhost   = true,
 
+  $default_vhost_options = {
+    docroot_owner => 'www-data',
+    docroot_group => 'www-data'
+  },
+
   /* only used if $::is_container is true */
   $service_command = 'apache2ctl -DFOREGROUND',
 ) inherits teneleven::params {
 
   $vhosts.each |$name, $options| {
-    create_resources('teneleven::apache::vhost', { $name => {
-      options => $options
-    }})
+    create_resources('::apache::vhost', { $name => merge(
+      $default_vhost_options,
+      $options,
+      { port => $port }
+    ) })
+
+    if ($ssl) {
+      create_resources('::apache::vhost', { "${name}_ssl" => merge(
+        $default_vhost_options,
+        $options,
+        { port => $ssl_port }
+      ) })
+    }
   }
 
   if $modules.is_a(Array) {

@@ -8,6 +8,7 @@ mod 'puppetlabs-apt'
 mod 'ajcrowe-supervisord'
 mod 'garethr-docker',
   :git => 'https://github.com/garethr/garethr-docker.git'
+mod 'thias-fooacl'
 
 # web
 mod 'puppetlabs-apache'

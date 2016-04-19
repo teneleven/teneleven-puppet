@@ -5,7 +5,12 @@ class teneleven::server (
   },
 
   $packages         = [],
-  $package_defaults = {}
+  $package_defaults = {},
+
+  $users            = {},
+
+  $acls             = {},
+  $default_acls     = []
 ) {
   if (!empty($packages)) {
     if $::osfamily == 'Debian' {
@@ -26,5 +31,20 @@ class teneleven::server (
     if (!empty($packages)) {
       Class['::teneleven::apt'] -> Exec["server_exec_${exe}"]
     }
+  }
+
+  $users.each |$user, $options| {
+    if ($options['groups']) {
+      ensure_resource('group', $options['groups'], { ensure => present })
+    }
+
+    create_resources('user', { "server_user_${user}" => $options })
+  }
+
+  $acls.each |$file, $permissions| {
+    create_resources('::fooacl::conf', {"server_acl_${file}" => {
+      target      => $file,
+      permissions => concat($default_acls, $permissions)
+    }})
   }
 }

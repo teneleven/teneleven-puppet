@@ -39,7 +39,7 @@ class teneleven::docker (
         default => $containers[$name]
       }
 
-      create_resources('teneleven::container::run', { $name => { options => $options } })
+      create_resources('teneleven::docker::run', { $name => { options => $options } })
     }
   }
 
@@ -56,31 +56,13 @@ class teneleven::docker (
         default => merge($default_options, $containers[$name])
       }
 
-      create_resources('teneleven::container::provision', { $name => { run_options => $options } })
+      create_resources('teneleven::docker::provision', { $name => { run_options => $options } })
     }
   }
 
   if (!empty($compose)) {
-    $compose.each |$name, $app_type| {
-      $compose_app_path = "${compose_dir}/${name}/${compose_file}"
-      $compose_default_path = "${compose_dir}/${compose_default}"
-      $compose_test = "/usr/bin/test -e ${compose_app_path}"
-
-      /* compose app NAME */
-      exec { "compose-${name}":
-        command     => "docker-compose -f ${compose_app_path} up -d",
-        provider    => 'shell',
-        environment => ["COMPOSE_PROJECT_NAME=${name}", "COMPOSE_APP_TYPE=${app_type}"],
-        onlyif      => $compose_test
-      }
-
-      /* compose fallback (if app NAME doesn't exist) */
-      exec { "compose-default-${name}":
-        command     => "docker-compose -f ${compose_default_path} up -d",
-        provider    => 'shell',
-        environment => ["COMPOSE_PROJECT_NAME=${name}", "COMPOSE_APP_TYPE=${app_type}"],
-        unless      => $compose_test
-      }
+    $compose.each |$app_name, $app_type| {
+      create_resources('teneleven::docker::compose', { $app_name => { app_type => $app_type } })
     }
   }
 }

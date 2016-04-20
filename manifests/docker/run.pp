@@ -3,7 +3,7 @@
  *
  * If puppet_dir fact is set, also mounts the puppet dir using the puppet_dir fact
  */
-define teneleven::container::run (
+define teneleven::docker::run (
   $options      = {},        /* docker options */
   $puppet_mount = undef,
 
@@ -12,7 +12,7 @@ define teneleven::container::run (
   $default_env      = ['FACTER_is_container=1'],
 ) {
   include ::teneleven::params
-  include ::teneleven::container::base
+  include ::teneleven::docker::image
 
   $real_puppet_mount = $puppet_mount ? {
     default => $puppet_mount,

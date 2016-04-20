@@ -3,8 +3,12 @@ class teneleven::docker (
   $images     = [],
   $run        = [],
   $provision  = [],
-  $compose    = [],
-  $containers = {}
+  $containers = {},
+
+  $compose         = [],
+  $compose_default = 'default.yml',
+  $compose_file    = 'docker-compose.yml',
+  $compose_dir     = 'docker-compose'
 ) {
   if ($install) {
     if ($::is_container) {
@@ -57,19 +61,26 @@ class teneleven::docker (
   }
 
   if (!empty($compose)) {
-    $compose.each |$name, $compose_file| {
-      /* simple exec for docker-compose */
+    $compose.each |$name, $app_type| {
+      $compose_app_path = "${compose_dir}/${name}/${compose_file}"
+      $compose_default_path = "${compose_dir}/${compose_default}"
+      $compose_test = "/usr/bin/test -e ${compose_app_path}"
+
+      /* compose app NAME */
       exec { "compose-${name}":
-        command     => "docker-compose -f ${compose_file} up &",
+        command     => "docker-compose -f ${compose_app_path} up -d",
         provider    => 'shell',
-        environment => ["COMPOSE_PROJECT_NAME=${name}"]
+        environment => ["COMPOSE_PROJECT_NAME=${name}", "COMPOSE_APP_TYPE=${app_type}"],
+        onlyif      => $compose_test
       }
 
-      /* FIXME not working since not setting env variable */
-      /* docker_compose { $compose_file: */
-      /*   ensure  => present, */
-      /*   options => "-p ${name}" */
-      /* } */
+      /* compose fallback (if app NAME doesn't exist) */
+      exec { "compose-default-${name}":
+        command     => "docker-compose -f ${compose_default_path} up -d",
+        provider    => 'shell',
+        environment => ["COMPOSE_PROJECT_NAME=${name}", "COMPOSE_APP_TYPE=${app_type}"],
+        unless      => $compose_test
+      }
     }
   }
 }

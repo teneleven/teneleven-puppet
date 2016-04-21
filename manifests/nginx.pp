@@ -1,5 +1,6 @@
 class teneleven::nginx (
   $vhosts   = {},
+  $options  = {},
   $user     = $teneleven::params::web_user,
   $wildcard = undef,
 
@@ -12,6 +13,8 @@ class teneleven::nginx (
   if ($wildcard) {
     create_resources('teneleven::nginx::wildcard', { 'wildcard' => $wildcard })
   }
+
+  create_resources('class', { '::nginx::config' => $options })
 
   if ($::is_container) {
     class { '::nginx':

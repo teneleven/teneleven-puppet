@@ -5,10 +5,11 @@ class teneleven::docker (
   $provision  = [],
   $containers = {},
 
-  $compose         = [],
-  $compose_default = 'default.yml',
-  $compose_file    = 'docker-compose.yml',
-  $compose_dir     = 'docker-compose'
+  $compose              = [],
+  $compose_default      = 'default.yml',
+  $compose_file         = 'docker-compose.yml',
+  $compose_dir          = 'docker-compose',
+  $compose_fallback_dir = undef
 ) {
   if ($install) {
     if ($::is_container) {

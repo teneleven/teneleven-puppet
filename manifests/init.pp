@@ -1,7 +1,8 @@
 class teneleven (
-  $packages = [],
-  $commands = [],
-  $programs = {},
+  $packages   = [],
+  $commands   = [],
+  $programs   = {},
+  $load_hiera = true,
   $supervisorctl_command = '/usr/bin/supervisorctl',
 ) {
 
@@ -40,9 +41,11 @@ class teneleven (
 
   }
 
-  /* parse teneleven hiera config */
-  hiera_hash('teneleven', {}).each |$name, $option| {
-    create_resources('class', { "::teneleven::${name}" => $option })
+  if $load_hiera {
+    /* parse teneleven hiera config */
+    hiera_hash('teneleven', {}).each |$name, $option| {
+      create_resources('class', { "::teneleven::${name}" => $option })
+    }
   }
 
   /* TODO ensure the following is preserved: */

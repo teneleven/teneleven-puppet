@@ -3,7 +3,8 @@ define teneleven::docker::compose (
   $app_type = undef
 ) {
 
-  include teneleven::docker
+  include ::teneleven::docker
+  include ::teneleven::docker::image
 
   $compose_fallback_dir = $teneleven::docker::compose_fallback_dir ? {
     undef   => "${teneleven::docker::compose_dir}",
@@ -25,7 +26,8 @@ define teneleven::docker::compose (
     command     => "docker-compose -f ${compose_app_name_path} up -d",
     provider    => 'shell',
     environment => $compose_environment,
-    onlyif      => "/usr/bin/test -e ${compose_app_name_path}"
+    onlyif      => "/usr/bin/test -e ${compose_app_name_path}",
+    require     => Class[teneleven::docker::image]
   }
 
   if $app_type {
@@ -35,7 +37,8 @@ define teneleven::docker::compose (
       provider    => 'shell',
       environment => $compose_environment,
       unless      => "/usr/bin/test -e ${compose_app_name_path}",
-      onlyif      => "/usr/bin/test -e ${compose_app_type_path}"
+      onlyif      => "/usr/bin/test -e ${compose_app_type_path}",
+      require     => Class[teneleven::docker::image]
     }
 
     /* compose app_type fallback */
@@ -44,7 +47,8 @@ define teneleven::docker::compose (
       provider    => 'shell',
       environment => $compose_environment,
       unless      => "/usr/bin/test -e ${compose_app_name_path} || /usr/bin/test -e ${compose_app_type_path}",
-      onlyif      => "/usr/bin/test -e ${compose_app_type_fallback_path}"
+      onlyif      => "/usr/bin/test -e ${compose_app_type_fallback_path}",
+      require     => Class[teneleven::docker::image]
     }
   }
 
@@ -54,6 +58,7 @@ define teneleven::docker::compose (
     provider    => 'shell',
     environment => $compose_environment,
     unless      => "/usr/bin/test -e ${compose_app_name_path} || /usr/bin/test -e ${compose_app_type_path} || /usr/bin/test -e ${compose_app_type_fallback_path}",
+    require     => Class[teneleven::docker::image]
   }
 
 }

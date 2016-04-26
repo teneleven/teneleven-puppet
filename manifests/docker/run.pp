@@ -11,8 +11,8 @@ define teneleven::docker::run (
   $default_image    = 'base',
   $default_env      = ['FACTER_is_container=1'],
 ) {
+  include ::teneleven::docker
   include ::teneleven::params
-  include ::teneleven::docker::image
 
   $real_puppet_mount = $puppet_mount ? {
     default => $puppet_mount,

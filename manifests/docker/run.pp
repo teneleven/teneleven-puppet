@@ -1,6 +1,5 @@
 /**
- * Run a container using docker::run
- *
+ * Run a container using docker::run 
  * If puppet_dir fact is set, also mounts the puppet dir using the puppet_dir fact
  */
 define teneleven::docker::run (
@@ -41,4 +40,15 @@ define teneleven::docker::run (
   if ($options['depends']) {
     Docker::Run[$options['depends']] -> Docker::Run[$title]
   }
+
+  /* TODO look into straight exec instead of depending on garethr::docker, in order to lessen need for sudo */
+  /* $cidfile = "/var/run/${service_prefix}${sanitised_title}.cid" */
+
+  /* exec { "run ${title} with docker": */
+  /*   command     => "${docker_command} run -d ${docker_run_flags} --name ${sanitised_title} --cidfile=${cidfile} --restart=\"${restart}\" ${image} ${command}", */
+  /*   unless      => "${docker_command} ps --no-trunc -a | grep `cat ${cidfile}`", */
+  /*   environment => 'HOME=/root', */
+  /*   path        => ['/bin', '/usr/bin'], */
+  /*   timeout     => 0 */
+  /* } */
 }

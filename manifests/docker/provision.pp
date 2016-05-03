@@ -7,6 +7,7 @@ define teneleven::docker::provision (
 
   Class[::teneleven::docker::image] -> Class[::teneleven::docker::run]
 
+  /* TODO change this to be a Run -> Exec dependency */
   create_resources('::teneleven::docker::run', { $title => {
     puppet_mount => $puppet_mount,
     options      => merge({

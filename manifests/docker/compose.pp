@@ -1,6 +1,7 @@
 define teneleven::docker::compose (
   $app_name = $title,
-  $app_type = undef
+  $app_type = undef,
+  $env      = []
 ) {
 
   include ::teneleven::docker
@@ -16,9 +17,9 @@ define teneleven::docker::compose (
   $compose_app_type_fallback_path = "${compose_fallback_dir}/${app_type}/${teneleven::docker::compose_file}"
   $compose_fallback_path = "${compose_fallback_dir}/${teneleven::docker::compose_default}"
 
-  $compose_environment = $app_type ? {
-    undef   => ["COMPOSE_PROJECT_NAME=${app_name}"],
-    default => ["COMPOSE_PROJECT_NAME=${app_name}", "COMPOSE_APP_TYPE=${app_type}"],
+  $compose_environment = $env ? {
+    undef => ["COMPOSE_PROJECT_NAME=${app_name}", "COMPOSE_APP_TYPE=${app_type}"],
+    default => concat(["COMPOSE_PROJECT_NAME=${app_name}"], $env)
   }
 
   /* compose app_name */

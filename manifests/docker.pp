@@ -63,7 +63,9 @@ class teneleven::docker (
 
   if (!empty($compose)) {
     $compose.each |$app_name, $app_type| {
-      create_resources('teneleven::docker::compose', { $app_name => { app_type => $app_type } })
+      create_resources('teneleven::docker::compose', { $app_name => {
+        app_type => $app_type
+      } })
     }
   }
 }

@@ -14,16 +14,14 @@ RUN apt-get update --fix-missing && apt-get install -y \
         nfs-common \
         apt-transport-https \
         lxc \
-        supervisor \
-    && apt-get clean #cleanup to reduce image size
+        supervisor
 
 # Puppet
-RUN wget http://apt.puppetlabs.com/puppetlabs-release-stable.deb -O /tmp/puppetlabs-release-stable.deb && \
+RUN wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O /tmp/puppetlabs-release-stable.deb && \
     dpkg -i /tmp/puppetlabs-release-stable.deb && \
     apt-get update && \
     apt-get install puppet puppet-common hiera facter virt-what lsb-release  -y --force-yes && \
-    rm -f /tmp/*.deb && \
-    apt-get clean
+    rm -f /tmp/*.deb
 
 VOLUME /puppet
 COPY   provision.sh /provision.sh

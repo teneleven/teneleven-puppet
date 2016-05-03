@@ -24,11 +24,6 @@ if [ `puppet --version | cut -c1` -eq "3" ]; then
     EXTRA_ARGS="--parser=future"
 fi
 
-if ! [ -z "$FACTER_is_container" ]; then
-    # do this so we don't get errors on apt install
-    apt-get update --fix-missing -y;
-fi
-
 puppet apply \
   --modulepath "$FACTER_puppet_dir/modules"      \
   --hiera_config "$FACTER_puppet_dir/hiera.yaml" \

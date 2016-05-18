@@ -18,14 +18,22 @@ if ! [ -z "$1" ]; then
     export FACTER_hostname="$1"
 fi
 
-EXTRA_ARGS=""
+# detect if we get future parser (for iterators)
 if [ `puppet --version | cut -c1` -eq "3" ]; then
-    # iterators!
     EXTRA_ARGS="--parser=future"
+else
+    EXTRA_ARGS=""
+fi
+
+# detect manifest location
+if [ -f "$FACTER_puppet_dir/manifests/provision.pp" ]; then
+    MANIFEST_DIR="$FACTER_puppet_dir/manifests/provision.pp"
+else
+    MANIFEST_DIR="$FACTER_puppet_dir/manifests"
 fi
 
 puppet apply \
   --modulepath "$FACTER_puppet_dir/modules"      \
   --hiera_config "$FACTER_puppet_dir/hiera.yaml" \
-  $EXTRA_ARGS                             \
-  "$FACTER_puppet_dir/manifests";
+  $EXTRA_ARGS                                    \
+  $MANIFEST_DIR;

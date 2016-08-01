@@ -57,7 +57,7 @@ class teneleven::docker (
         default => merge($default_options, $containers[$name])
       }
 
-      create_resources('teneleven::docker::provision', { $name => { run_options => $options } })
+      create_resources('teneleven::provision::docker', { $name => { run_options => $options } })
     }
   }
 

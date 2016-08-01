@@ -25,6 +25,7 @@ class teneleven::php::debug (
         value => '1'
     }
 
+    /* fixes xdebug recursion limit */
     teneleven::php::xdebug {
       'xdebug.max_nesting_level':
         value => '10000'

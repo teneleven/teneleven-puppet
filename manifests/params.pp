@@ -4,6 +4,8 @@ class teneleven::params (
   $app_root   = "/var/www", /* fcgi php root path */
   $app_port   = 9000,       /* fcgi port */
 
+  $docker_prefix = '1011',
+
   $web_user   = 'www-data',
   $web_group  = 'www-data',
   $web_uid    = 1000,

@@ -10,8 +10,9 @@ define teneleven::docker::commit (
 
   /* commit container */
   exec { "commit-${container}":
-    command     => "docker commit ${container} ${real_tag}",
-    provider    => 'shell'
+    command  => "docker commit ${container} ${real_tag}",
+    provider => 'shell',
+    path     => ['/bin', '/usr/bin']
   }
 
 }

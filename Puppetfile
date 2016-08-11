@@ -15,6 +15,7 @@ mod 'puppetlabs-apache'
 mod 'jfryman-nginx'
 
 # db
+mod 'puppetlabs-java'
 mod 'puppetlabs-mysql'
 mod 'elasticsearch-elasticsearch'
 

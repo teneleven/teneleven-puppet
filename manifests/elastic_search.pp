@@ -2,7 +2,8 @@ class teneleven::elastic_search (
   $settings = {},
 
   $default_settings = {
-    java_install => true
+    java_install => true,
+    manage_repo  => true
   }
 ) inherits teneleven::params {
 

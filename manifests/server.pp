@@ -4,6 +4,8 @@ class teneleven::server (
     path => ['/usr/bin', '/bin', '/usr/sbin', '/sbin']
   },
 
+  $files            = {},
+
   $packages         = [],
   $package_defaults = {},
 
@@ -22,14 +24,27 @@ class teneleven::server (
     }
   }
 
-  $exec.each |$exe| {
-    create_resources('exec', { "server_exec_${exe}" => merge(
-      $exec_defaults,
-      { command => $exe }
-    ) })
+  $files.each |$name,$options| {
+    create_resources('file', { $name => $options })
+  }
 
-    if (!empty($packages)) {
-      Class['::teneleven::apt'] -> Exec["server_exec_${exe}"]
+  $exec.each |$name,$options| {
+    if (is_hash($options)) {
+      create_resources('exec', { $name => merge(
+        $exec_defaults,
+        $options
+      ) })
+    } else {
+      $exe = $options
+
+      create_resources('exec', { "server_exec_${exe}" => merge(
+        $exec_defaults,
+        { command => $exe }
+      ) })
+
+      if (!empty($packages)) {
+        Class['::teneleven::apt'] -> Exec["server_exec_${exe}"]
+      }
     }
   }
 

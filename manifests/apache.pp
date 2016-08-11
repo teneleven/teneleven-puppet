@@ -1,7 +1,7 @@
 class teneleven::apache (
   $vhosts   = {},
   $modules  = {},
-  $user     = $teneleven::params::web_user,
+  $config   = {},
 
   $port            = 80,
   $ssl_port        = 443,
@@ -9,14 +9,24 @@ class teneleven::apache (
   $serve_php_files = true,
   $default_vhost   = true,
 
-  $default_vhost_options = {
-    docroot_owner => 'www-data',
-    docroot_group => 'www-data'
-  },
-
   /* only used if $::is_container is true */
   $service_command = 'apache2ctl -DFOREGROUND',
 ) inherits teneleven::params {
+
+  $web_user = $config['user'] ? {
+    default => $config['user'],
+    undef   => $teneleven::params::web_user
+  }
+
+  $web_group = $config['group'] ? {
+    default => $config['group'],
+    undef   => $teneleven::params::web_group
+  }
+
+  $default_vhost_options = {
+    docroot_owner => $web_user,
+    docroot_group => $web_group
+  }
 
   $vhosts.each |$name, $options| {
     create_resources('::apache::vhost', { $name => merge(
@@ -53,6 +63,16 @@ class teneleven::apache (
       fcgi_alias => '/php.fcgi',
       file_type  => 'application/x-httpd-php'
     }
+
+    include apache::params
+
+    /* this ensures correct permissions on fastcgi_lib_path */
+    file { $::apache::params::fastcgi_lib_path:
+      ensure => directory,
+      owner  => $web_user,
+      group  => $web_group,
+      before => File['fastcgi.conf']
+    }
   }
 
   apache::listen { "${port}": }
@@ -62,11 +82,13 @@ class teneleven::apache (
   }
 
   if ($::is_container) {
-    class { '::apache':
+    $default_apache_options = {
       service_ensure => stopped,
       manage_user    => false,
       manage_group   => false,
-      default_vhost  => $default_vhost
+      default_vhost  => $default_vhost,
+      user           => $web_user,
+      group          => $web_group
     }
 
     supervisord::program { 'apache':
@@ -76,10 +98,17 @@ class teneleven::apache (
       stopasgroup => true,
     }
   } else {
-    class { '::apache':
-      default_vhost  => $default_vhost
+    $default_apache_options = {
+      default_vhost  => $default_vhost,
+      user           => $web_user,
+      group          => $web_group
     }
   }
+
+  create_resources('class', { '::apache' => merge(
+    $default_apache_options,
+    $config
+  )})
 
   contain '::apache'
 

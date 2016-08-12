@@ -6,9 +6,9 @@ class teneleven::nodejs (
 
   $packages.each |$name, $package| {
     if (is_hash($package)) {
-      create_resources('::package', { $name => $package })
+      create_resources('::package', { $name => merge({ provider => 'npm' }, $package) })
     } else {
-      package { $package: }
+      package { $package: provider => 'npm' }
     }
   }
 }

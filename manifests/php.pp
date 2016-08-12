@@ -5,6 +5,7 @@ class teneleven::php (
   /* PHP.ini config */
   $config     = {},
 
+  $composer   = false,
   $dev        = true,
 
   $user       = $teneleven::params::web_user,
@@ -23,6 +24,15 @@ class teneleven::php (
   contain php::fpm::params
   contain php::fpm::package
   contain php::cli
+
+  if ($composer) {
+    $composer_settings = is_hash($composer) ? {
+      true  => $composer,
+      false => {}
+    }
+
+    create_resources('class', { php::composer => $composer_settings })
+  }
 
   if ($::is_container) {
     class { php::fpm::service:

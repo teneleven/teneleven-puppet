@@ -8,7 +8,7 @@ class teneleven::nodejs (
     if (is_hash($package)) {
       create_resources('::package', { $name => $package })
     } else {
-      package { $name: }
+      package { $package: }
     }
   }
 }

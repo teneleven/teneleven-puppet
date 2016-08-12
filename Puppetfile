@@ -22,3 +22,6 @@ mod 'elasticsearch-elasticsearch'
 # sf stuff
 mod 'nodes/php'
 mod 'willdurand-composer'
+
+# other
+mod 'puppet-nodejs'

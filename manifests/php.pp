@@ -21,8 +21,6 @@ class teneleven::php (
 
   teneleven::php::extension { $extensions: }
 
-  contain php::fpm::params
-  contain php::fpm::package
   contain php::cli
 
   if ($composer) {
@@ -35,22 +33,22 @@ class teneleven::php (
   }
 
   if ($::is_container) {
-    class { php::fpm::service:
-      enable => false,
-      ensure => 'stopped',
-    }
+    $service_enabled = false
+    $service_ensure  = 'stopped'
 
     supervisord::program { 'fpm':
       command     => $service_command,
       autorestart => true,
     }
   } else {
-    contain ::php::fpm::service
+    $service_enabled = true
+    $service_ensure  = 'running'
   }
 
-  php::fpm::config { 'php-fpm':
-    file    => $php::fpm::params::inifile,
-    config  => $settings
+  class { php::fpm:
+    service_enable => $service_enabled,
+    service_ensure => $service_ensure,
+    settings       => $settings
   }
 
   php::fpm::pool { 'www':

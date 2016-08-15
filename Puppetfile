@@ -20,7 +20,8 @@ mod 'puppetlabs-mysql'
 mod 'elasticsearch-elasticsearch'
 
 # sf stuff
-mod 'nodes/php'
+mod 'nodes/php',
+  :git => 'https://github.com/jippi/puppet-php'
 mod 'willdurand-composer'
 
 # other
